@@ -2,3 +2,4 @@ env
 *.webm
 *.mp4
 *.mkv
+__pycache__
