@@ -1,9 +1,11 @@
-from typing import List
-
+from apiclient.errors import HttpError
 import click
 import ffmpeg
 import os
 import shutil
+from typing import List
+
+from youtube.upload_vid import YoutubeUploader
 
 class Cutter:
     __path: str
@@ -59,7 +61,7 @@ class Cutter:
               help='Comma separated duration timestamps, eg. 00:00:00-00:01:30,00:19:40-00:20:00')
 @click.option('--filename', required=True,
               help='Filename which needs to be cut and joined based on the duration timestamp')
-def cut_and_join(*, filename: str, timestamps: str):
+def cut_and_join(*, filename: str, timestamps: str) -> str:
     timestamps = timestamps.split(',')
     if len(timestamps) > 0:
         cutter = Cutter(
@@ -68,6 +70,36 @@ def cut_and_join(*, filename: str, timestamps: str):
         )
         filepath: str = cutter.cut_and_join()
         print(f'Video saved to {filepath}')
+
+
+@click.command()
+@click.option('--timestamps', default='', required=True,
+              help='Comma separated duration timestamps, eg. 00:00:00-00:01:30,00:19:40-00:20:00')
+@click.option('--filename', required=True,
+              help='Filename which needs to be cut and joined based on the duration timestamp')
+@click.option('--privacy', required=True,
+              help='privacy settings for the uploaded video. Allowed are public, private, unlisted')
+def cut_and_join_and_upload_to_youtube(*, filename: str, timestamps: str, privacy: str):
+    timestamps = timestamps.split(',')
+    if len(timestamps) > 0:
+        cutter = Cutter(
+            path=filename,
+            timestamps=timestamps
+        )
+        filepath: str = cutter.cut_and_join()
+
+        youtube_uploader: YoutubeUploader = YoutubeUploader(
+            file=filepath,
+            title=filepath.split('/')[1],
+            description=f'Video uploaded via script',
+            category="22",
+            tags=["trending", "gaming"],
+            privacy_status=privacy
+        )
+        try:
+            youtube_uploader.upload()
+        except HttpError:
+            print("An HTTP error %d occurred:\n%s" % (e.resp.status.content))
 
 
 @click.command()

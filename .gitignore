@@ -3,3 +3,5 @@ env
 *.mp4
 *.mkv
 __pycache__
+*token.json
+*client_secret.json
