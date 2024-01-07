@@ -21,7 +21,7 @@ class Cutter:
         os.chdir(f'./{self.__path}')
 
     def __cut(self, *, start: str, end: str, suffix: str) -> str:
-        ffmpeg.input(f'./{self.__path}.{self.__extension}', ss=start, to=end).output(f'./{self.__path}_{suffix}.{self.__extension}').run()
+        ffmpeg.input(f'./{self.__path}.{self.__extension}', ss=start, to=end).output(f'./{self.__path}_{suffix}.{self.__extension}', c='copy').run()
         
     def __cut_portions(self):
         for number, timestamp in enumerate(self.__timestamps):
